@@ -7,9 +7,32 @@
     <title>To-Do-List</title>
 </head>
 <body>
+    <div class="add-form">
+        <button class="close-form">X</button>
+        <form action="%" method="post"> 
+            <label for="task-name">Task</label>
+            <input type="text" name="task-name" id="task-name" required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
     <header>To-Do-List</header>
-    <div class="container">grg</div>
-    <div>grg</div>
+    <div class="nav-bar">
+        <ul>
+            <li>Inbox</li>
+            <li>Today</li>
+            <li>This Week</li>      
+        </ul>
+        <ul>
+            <li>Projects</li>
+            <li>Add New Project</li>
+        </ul>
+    </div>
+    <div class="container">
+        <div class="tab-name">NAME</div>
+        <div class="main">
+            <button class="add-btn">Add a task</button>
+        </div>
+    </div>
 </body>
 <script src="bundle.js"></script>
 </html>
