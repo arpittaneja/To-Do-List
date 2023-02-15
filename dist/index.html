@@ -7,11 +7,26 @@
     <title>To-Do-List</title>
 </head>
 <body>
-    <div class="add-form">
+    <div class="form-container">
         <button class="close-form">X</button>
-        <form action="%" method="post"> 
-            <label for="task-name">Task</label>
-            <input type="text" name="task-name" id="task-name" required>
+        <form action="%" method="post">
+            <div>
+                <label for="task-title">Title</label>
+                <input type="text" name="taskTitle" id="task-title" value ="demo" required>
+            </div>
+            <div>
+                <label for="task-desc">Description</label>
+                <input type="text" name="taskDesc" id="task-desc" value ="demo" required>
+            </div>
+            <div>
+                <label for="due-date">Due Date</label>
+                <input type="date" name="dueDate" id="due-date" value ="2023-02-15" required>
+            </div>
+            <div>
+                <label for="task-priority">Priority</label>
+                <input type="checkbox" name="taskPriority" id="task-priority">
+            </div>
+
             <button type="submit">Submit</button>
         </form>
     </div>
@@ -20,7 +35,7 @@
         <ul>
             <li>Inbox</li>
             <li>Today</li>
-            <li>This Week</li>      
+            <li>This Week</li>
         </ul>
         <ul>
             <li>Projects</li>
@@ -28,10 +43,10 @@
         </ul>
     </div>
     <div class="container">
-        <div class="tab-name">NAME</div>
-        <div class="main">
-            <button class="add-btn">Add a task</button>
+        <div class="tab-selected-name">NAME</div>
+        <div class="todo-container">
         </div>
+        <button class="add-btn">Add a task</button>
     </div>
 </body>
 <script src="bundle.js"></script>
