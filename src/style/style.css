@@ -37,8 +37,8 @@ ul {
 
 li {
     font-size: 1.2rem;
-    padding-block: 10px;
-    margin-block: 18px;
+    /* padding-block: 10px; */
+    /* margin-block: 18px; */
     cursor: pointer;
 }
 
@@ -52,6 +52,19 @@ li {
     transform: translate(-50%, -50%);
 }
 
-.todo-container {
-    
+.selected{
+    background-color: green;
+}
+
+.add-new-project:hover{
+    background-color: grey;
+}
+
+.input-project{
+    display: none;
+}
+
+.projects-container{
+    /* height: 0; */
+    background-color: rgb(162, 162, 255);
 }
