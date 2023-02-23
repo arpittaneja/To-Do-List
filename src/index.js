@@ -163,8 +163,8 @@ const displayController = (() => {
         'click',
         (e) => {
           // e.stopPropagation();
-          console.log(tab.textContent);
-          console.log('clicked');
+          // console.log(tab.textContent);
+          console.log(`${tab.textContent}clicked`);
           // console.log(tab.textContent, previouslySelectedTab);
           // if (tab.textContent !== previouslySelectedTab) {
           //   previouslySelectedTab = tab.textContent;
