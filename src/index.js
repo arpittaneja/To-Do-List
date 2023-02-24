@@ -6,6 +6,7 @@ import { add, parse, formatISO, isEqual, isWithinInterval } from 'date-fns';
 const createTask = (title, project, description, dueDate, priority) => {
   return {
     title,
+    project,
     description,
     dueDate,
     priority,
@@ -16,6 +17,7 @@ const toDoList = (() => {
   const inboxTaskList = [];
   let todayToDosList = [];
   let weekToDosList = [];
+  const projectToDosList = [];
 
   const currentDate = new Date();
   const currentDateISO = formatISO(currentDate, { representation: 'date' });
@@ -23,12 +25,11 @@ const toDoList = (() => {
   const weekAfterCurrentDateISO = formatISO(weekAfterCurrentDate, {
     representation: 'date',
   });
-  console.log(currentDateISO);
-  console.log(weekAfterCurrentDateISO);
 
   const getInboxTaskList = () => inboxTaskList;
   const getTodayToDosList = () => todayToDosList;
   const getWeekToDosList = () => weekToDosList;
+  const getProjectToDosList = () => projectToDosList;
 
   const addTaskToToDoList = (taskObject) => {
     addTaskToInbox(taskObject);
@@ -115,6 +116,7 @@ const toDoList = (() => {
     getInboxTaskList,
     getTodayToDosList,
     getWeekToDosList,
+    getProjectToDosList,
     removeTaskFromAllLists: removeTaskFromInbox,
     removeTaskFromTodayList,
     updateTodayList,
@@ -125,20 +127,19 @@ const toDoList = (() => {
 
 const displayController = (() => {
   const tabNameContainer = document.querySelector('.tab-selected-name');
-  const inboxTabs = Array.from(document.querySelectorAll('.inbox>li'));
+  const navBarTabs = Array.from(document.querySelectorAll('li'));
   const addButton = document.querySelector('.add-btn');
   const formDiv = document.querySelector('.form-container');
   const formCloseButton = document.querySelector('.close-form');
   const form = document.querySelector('form');
   const toDoContainer = document.querySelector('.todo-container');
-  let previouslySelectedTab = 'Inbox';
+  let previouslySelectedTab = navBarTabs[0];
   const addNewProject = document.querySelector('.add-new-project');
   const addNewProjectInputTab = document.querySelector('.input-project');
   const addProjectButton = document.querySelector('.add-project-btn');
   const cancelProjectButton = document.querySelector('.cancel-project-btn');
   const projectInput = document.querySelector('.project-input');
-  const insertBeforeLi = document.querySelector('.insert-before-li');
-
+  // const insertBeforeLi = document.querySelector('.insert-before-li');
   const projectsContainer = document.querySelector('.projects-container');
 
   addNewProject.addEventListener('click', (e) => {
@@ -146,67 +147,95 @@ const displayController = (() => {
     addNewProjectInputTab.style.display = 'block';
   });
 
+  // create the project tab and add a plus button to it
   addProjectButton.addEventListener('click', (ev) => {
     const newProject = document.createElement('li');
+    const addProjectTaskButton = document.createElement('button');
+    addProjectTaskButton.textContent = '  +  ';
+    const projectName = projectInput.value;
     newProject.classList.add('project-tab');
-    newProject.textContent = projectInput.value;
-    projectsContainer.append(newProject);
+
+    newProject.addEventListener('click', (e) => {
+      e.stopPropagation();
+      console.log('tab ka hai', e.target.textContent);
+    });
+
+    const projectList = toDoList
+      .getInboxTaskList()
+      .filter((task) => task.project === projectName);
+    makeAllDivs(projectList);
+    newProject.textContent = projectName;
+    // newProject.append(addProjectTaskButton);
+
+    addProjectTaskButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      formDiv.style.display = 'block';
+      document.querySelector('#project-name').value = projectName;
+      // console.log('clicked saadha button bhirchulla');
+    });
+
+    newProject.addEventListener('click', onTabClick);
+
+    projectsContainer.append(newProject, addProjectTaskButton);
+
+    navBarTabs.push(newProject);
+
+    selectTab(newProject);
     addNewProject.style.display = 'block';
     addNewProjectInputTab.style.display = 'none';
     projectInput.value = '';
-
-    const projectTabs = Array.from(document.querySelectorAll('.project-tab'));
-    console.log(projectTabs);
-
-    projectTabs.forEach((tab) => {
-      tab.addEventListener(
-        'click',
-        (e) => {
-          // e.stopPropagation();
-          // console.log(tab.textContent);
-          console.log(`${tab.textContent}clicked`);
-          // console.log(tab.textContent, previouslySelectedTab);
-          // if (tab.textContent !== previouslySelectedTab) {
-          //   previouslySelectedTab = tab.textContent;
-          //   console.log(previouslySelectedTab);
-          // }
-        },
-        true
-      );
-    });
   });
 
-  inboxTabs.forEach((tab) => {
-    tab.addEventListener('click', (e) => {
-      console.log('jnfejen');
-      tabNameContainer.textContent = e.target.textContent;
-      console.log(tab.textContent, previouslySelectedTab);
+  const selectTab = (tab) => {
+    console.log('selecting tab');
+    console.log(tab);
+    tab.classList.remove('unselected');
+    tab.classList.add('selected');
 
-      if (tab.textContent !== previouslySelectedTab) {
-        previouslySelectedTab = tab.textContent;
-        console.log('different tab');
-
-        selectTab(tab);
-
-        // logic to display the to do list of the selected tab
-        // if (previouslySelectedTab === 'Inbox') {
-        // }
-
-        makeDivsOnChange();
+    // logic to remove the selected class on remaning tabs
+    navBarTabs.forEach((tb) => {
+      if (tb !== tab) {
+        tb.classList.remove('selected');
+        tb.classList.add('unselected');
       }
     });
+    console.log(tab);
+    console.log(navBarTabs);
+  };
+
+  const onTabClick = (e) => {
+    const currentlySelectedTab = e.target;
+
+    // if a new different tab is clicked
+    if (currentlySelectedTab !== previouslySelectedTab) {
+      // select that tab
+      selectTab(currentlySelectedTab);
+
+      // change name of tabNameContainer
+      tabNameContainer.textContent = currentlySelectedTab.textContent;
+
+      // change the value of previouslySelectedTab to the newly selected tab
+      previouslySelectedTab = currentlySelectedTab;
+      console.log('different tab');
+      makeDivsForNewlySelectedTab(currentlySelectedTab);
+    }
+  };
+
+  navBarTabs.forEach((tab) => {
+    tab.addEventListener('click', onTabClick);
   });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const taskName = document.querySelector('#task-title').value;
     const taskDescription = document.querySelector('#task-desc').value;
+    let projectName = document.querySelector('#project-name').value;
     const dueDate = document.querySelector('#due-date').value;
     const taskPriority = document.querySelector('#task-priority').checked;
 
     const task = createTask(
       taskName,
-      null,
+      projectName,
       taskDescription,
       dueDate,
       taskPriority
@@ -214,14 +243,27 @@ const displayController = (() => {
 
     toDoList.addTaskToToDoList(task);
 
+    // if the form is clicked from the main inbox tab
+    if (projectName === 'None') {
+      projectName = null;
+      previouslySelectedTab = navBarTabs[0];
+    } else {
+      console.log('im here');
+      // previouslySelectedTab = projectName;
+      previouslySelectedTab = navBarTabs.filter(
+        (tab) => tab.textContent === projectName
+      )[0];
+    }
+    selectTab(previouslySelectedTab);
+    makeDivsForNewlySelectedTab(previouslySelectedTab);
     form.reset();
     formDiv.style.display = 'none';
-    previouslySelectedTab = 'Inbox';
-    selectTab(inboxTabs[0]);
-    makeAllDivs(toDoList.getInboxTaskList());
   });
 
   formCloseButton.addEventListener('click', () => {
+    if (document.querySelector('#project-name').value !== '  None') {
+      form.reset();
+    }
     formDiv.style.display = 'none';
   });
 
@@ -229,56 +271,8 @@ const displayController = (() => {
     formDiv.style.display = 'block';
   });
 
-  const selectTab = (tab) => {
-    tab.classList.remove('unselected');
-    tab.classList.add('selected');
-
-    // logic to remove the selected class on remaning tabs
-    inboxTabs.forEach((tb) => {
-      if (tb.textContent !== previouslySelectedTab) {
-        tb.classList.remove('selected');
-        tb.classList.add('unselected');
-      }
-    });
-    console.log(tab);
-  };
-
-  // inboxTabs.forEach((tab) =>
-  //   tab.addEventListener('click', (e) => {
-  //     tabNameContainer.textContent = e.target.textContent;
-  //     if (e.target.classList.contains('unselected')) {
-  //       e.target.classList.remove('unselected');
-  //       e.target.classList.add('selected');
-  //       if (e.target.textContent === 'Inbox') {
-  //         toDoContainer.textContent = '';
-  //         makeAllToDoListDivs(toDoList.allToDosList);
-  //       } else if (e.target.textContent === 'Today') {
-  //         toDoContainer.textContent = '';
-  //         makeAllToDoListDivs(toDoList.todayToDosList);
-  //       } else if (e.target.textContent === 'Week') {
-  //         toDoContainer.textContent = '';
-  //         makeAllToDoListDivs(toDoList.weekToDosList);
-  //       }
-  //     }
-  //     inboxTabs.forEach((tb) => {
-  //       if (tb !== e.target) {
-  //         tb.classList.remove('selected');
-  //         tb.classList.add('unselected');
-  //       }
-  //     });
-  //   })
-  // );
-
-  // const updateToDoList = (index) => {
-  //   // toDoContainer.removeChild(Array.from(toDoContainer.children)[index]);
-  //   // console.log(Array.from(toDoContainer.children)[index]);
-  // };
-
-  // const makeAllToDoListDivs = (list) => {
-  //   console.log(11);
-  // };
-
   const makeAllDivs = (list) => {
+    console.log(list);
     toDoContainer.textContent = '';
     list.forEach((toDoObject) => {
       const toDoElement = document.createElement('div');
@@ -288,21 +282,32 @@ const displayController = (() => {
       clearButton.textContent = 'X';
 
       clearButton.addEventListener('click', (e) => {
-        const indexOfTodoToBeRemoved = Array.from(
-          toDoContainer.children
-        ).indexOf(e.target.parentElement);
+        const indexOfTodoToBeRemoved = toDoList
+          .getInboxTaskList()
+          .indexOf(toDoObject);
 
+        console.log('------------------------');
+        console.log(toDoList.getInboxTaskList());
+        console.log(toDoObject);
+        console.log('------------------------');
+        console.log('index', indexOfTodoToBeRemoved);
         toDoList.removeTaskFromAllLists(indexOfTodoToBeRemoved);
 
         console.log('all', toDoList.getInboxTaskList());
         console.log('today', toDoList.getTodayToDosList());
         console.log('week', toDoList.getWeekToDosList());
 
-        makeDivsOnChange();
+        console.log(
+          'deleting elements from tab',
+          navBarTabs.filter((tab) => tab.classList.contains('selected'))[0]
+        );
+
+        makeDivsForNewlySelectedTab(
+          navBarTabs.filter((tab) => tab.classList.contains('selected'))[0]
+        );
       });
 
       Object.values(toDoObject).forEach((value) => {
-        console.log('dffdsfsgs');
         console.log(value);
         toDoContent.textContent += `  ${value}`;
         toDoElement.style.backgroundColor = taskPriorityColor;
@@ -312,13 +317,18 @@ const displayController = (() => {
     });
   };
 
-  const makeDivsOnChange = () => {
-    if (previouslySelectedTab === 'Inbox') {
+  const makeDivsForNewlySelectedTab = (tab) => {
+    if (tab === navBarTabs[0]) {
       makeAllDivs(toDoList.getInboxTaskList());
-    } else if (previouslySelectedTab === 'Today') {
+    } else if (tab === navBarTabs[1]) {
       makeAllDivs(toDoList.getTodayToDosList());
-    } else {
+    } else if (tab === navBarTabs[2]) {
       makeAllDivs(toDoList.getWeekToDosList());
+    } else {
+      const projectTaskList = toDoList
+        .getInboxTaskList()
+        .filter((task) => task.project === tab.textContent);
+      makeAllDivs(projectTaskList);
     }
   };
   // return { createToDoElement: makeAllToDoListDivs };

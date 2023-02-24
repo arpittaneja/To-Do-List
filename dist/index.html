@@ -19,8 +19,12 @@
                 <input type="text" name="taskDesc" id="task-desc" value="demo" required>
             </div>
             <div>
+                <label for="project-name">Project Name</label>
+                <input type="text" name="projectName" id="project-name" value="None" required disabled>
+            </div>
+            <div>
                 <label for="due-date">Due Date</label>
-                <input type="date" name="dueDate" id="due-date" value="2023-02-20" required>
+                <input type="date" name="dueDate" id="due-date" value="2023-02-24" required>
             </div>
             <div>
                 <label for="task-priority">Priority</label>
@@ -38,12 +42,12 @@
             <li class="unselected">This Week</li>
         </ul>
         <ul class="projects">
-            <li>Projects
+            <div>Projects
                 <button class="add-new-project">Add New Project</button>
-            </li>
-            <li class="projects-container">
+            </div>
+            <div class="projects-container">
 
-            </li>
+            </div>
             <div class="input-project">
                 <input type="text" class="project-input" placeholder="Project Name" />
                 <button class="add-project-btn">Add</button>
