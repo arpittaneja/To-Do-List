@@ -13,8 +13,32 @@ const createTask = (title, project, description, dueDate, priority) => {
   };
 };
 
+const lS = (() => {
+  const addValue = (value) => {
+    window.localStorage.setItem('toDoList', JSON.stringify(value));
+  };
+
+  const updateValue = (value) => {
+    let val = localStorage.getItem('toDoList');
+    val = JSON.stringify(value);
+    localStorage.setItem('toDoList', val);
+    console.log('updating value');
+    console.log('current value', localStorage.getItem('toDoList'));
+  };
+
+  const getValue = (key) => {
+    const val = localStorage.getItem(key);
+    return JSON.parse(val);
+  };
+
+  // const getLocalStorage = () => localStorage;
+  return { addValue, updateValue, getValue };
+})();
+
 const toDoList = (() => {
-  const inboxTaskList = [];
+  const inboxTaskList = lS.getValue('toDoList') || [];
+
+  console.log(inboxTaskList);
   let todayToDosList = [];
   let weekToDosList = [];
   const projectToDosList = [];
@@ -33,6 +57,7 @@ const toDoList = (() => {
 
   const addTaskToToDoList = (taskObject) => {
     addTaskToInbox(taskObject);
+    lS.addValue(inboxTaskList);
     addTaskToTodayList(taskObject);
     addTaskToWeekList(taskObject);
   };
@@ -67,14 +92,15 @@ const toDoList = (() => {
   };
 
   const removeTaskFromInbox = (index) => {
-    // console.log(inboxTaskList, index);
     inboxTaskList.splice(index, 1);
+    lS.updateValue(inboxTaskList);
     updateTodayList();
     updateWeekList();
   };
 
   const updateTodayList = () => {
     todayToDosList = [];
+    console.log('all', inboxTaskList);
     inboxTaskList.forEach((task) => {
       console.log(task.dueDate === currentDateISO);
       if (task.dueDate === currentDateISO) {
@@ -111,6 +137,8 @@ const toDoList = (() => {
     todayToDosList.splice(index, 1);
     // console.log(allToDosList);
   };
+  updateTodayList();
+  updateWeekList();
 
   return {
     getInboxTaskList,
@@ -254,6 +282,7 @@ const displayController = (() => {
         (tab) => tab.textContent === projectName
       )[0];
     }
+
     selectTab(previouslySelectedTab);
     makeDivsForNewlySelectedTab(previouslySelectedTab);
     form.reset();
@@ -291,8 +320,10 @@ const displayController = (() => {
         console.log(toDoObject);
         console.log('------------------------');
         console.log('index', indexOfTodoToBeRemoved);
+        console.log(toDoList.getInboxTaskList());
         toDoList.removeTaskFromAllLists(indexOfTodoToBeRemoved);
-
+        console.log(toDoList.getInboxTaskList());
+        lS.updateValue(toDoList.getInboxTaskList());
         console.log('all', toDoList.getInboxTaskList());
         console.log('today', toDoList.getTodayToDosList());
         console.log('week', toDoList.getWeekToDosList());
@@ -331,5 +362,8 @@ const displayController = (() => {
       makeAllDivs(projectTaskList);
     }
   };
-  // return { createToDoElement: makeAllToDoListDivs };
+  return { makeAllDivs };
 })();
+
+// displayController.makeAllDivs(lS.getValue('toDoList'));
+displayController.makeAllDivs(toDoList.getInboxTaskList());
